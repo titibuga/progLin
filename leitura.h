@@ -1,5 +1,7 @@
-#include <list>
+#ifndef LEITURA_H
+#define LEITURA_H
 
+#include <list>
 #include "aresta.h"
 
 using namespace std;
@@ -18,3 +20,5 @@ typedef struct dados{
 // Funções
 
 Dados* leDados();
+
+#endif
