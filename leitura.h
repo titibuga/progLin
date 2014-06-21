@@ -10,6 +10,7 @@ using namespace std;
 typedef struct dados{
 	int nNos;
 	int no, nf; // Nó de origem e nó de destino
+	int f;
 	list<Aresta*> ars;
 
 

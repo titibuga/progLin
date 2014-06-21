@@ -17,4 +17,7 @@ typedef struct graph{
 
 }Graph;
 
+void addAresta(Graph *G, Aresta *a);
+void delAresta(Graph *G, Aresta *a);
+
 #endif

@@ -1,8 +1,8 @@
 FLAGS=-g -Wall 
 
 
-ep: leitura.o main.o simplex.o aresta.o graph.o
-	g++ $(FLAGS) -o ep leitura.o main.o
+ep: leitura.o main.o simplex.o aresta.o graph.o inicializar.o
+	g++ $(FLAGS) -o ep leitura.o main.o simplex.o aresta.o graph.o inicializar.o
 
 main.o: main.cc
 	g++ $(FLAGS) -c main.cc
@@ -18,4 +18,7 @@ aresta.o: aresta.cc aresta.h
 
 graph.o: graph.cc graph.h
 	g++ $(FLAGS) -c graph.cc
+
+inicializar.o: inicializar.cc inicializar.h
+	g++ $(FLAGS) -c inicializar.cc
 

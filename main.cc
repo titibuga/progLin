@@ -6,6 +6,7 @@
 // Minhas bibliotecas
 
 #include "leitura.h"
+#include "inicializar.h"
 
 using namespace std;
 
@@ -15,10 +16,20 @@ int main(int argc, char* argv[])
 {
 
 	Dados *ds = leDados();
-	int w = 0;
+	printf("Source: %d Sink: %d Fluxo: %d\n", ds->no, ds->nf, ds->f);
+	for(list<Aresta*>::const_iterator it  = ds->ars.begin();
+				it != ds->ars.end(); ++it)
+	{
+		Aresta *a = *it;
+		printf("%d->%d\n", a->a, a->b);
+	}
 
 
-	printf("HUE: %d\n", ds->nNos);
+
+	printf("----------------SIMPLEX---------------\n");
+
+	if(inicializa(ds)) printf("Viável!");
+	else printf("Inviável!!!!!!!!!!jnsajdj");
 
 
 

@@ -25,7 +25,15 @@ typedef struct tree{
 	int r; // Root
 	vector<Aresta*> p; // Parent
 	vector<int> d; // Depth
-	vector<int> f; //Flow
+	tree(int n)
+	{
+		p.resize(n);
+		d.resize(n);
+		T = new Graph(n);
+	}
+
+
+	//vector<int> f; //Flow
 
 }Tree;
 

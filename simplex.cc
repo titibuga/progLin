@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <cstdio>
 #include <vector>
 #include <list>
 #include <queue>
@@ -30,20 +31,26 @@ int networkSimplex(Tree *T, Dados *ds)
 
 	while(1)
 	{
+		
 		// Procura por aresta para entrar
 		Aresta *aIn;
+		float c2 = 0;
 
 		list<Aresta*>::const_iterator it;
 		for(it  = ds->ars.begin();
 				it != ds->ars.end(); ++it)
 		{
+
 			aIn = *it;
-			float c2 = aIn->c + y[aIn->a] - y[aIn->b];
+			printf("%d->%d\n",aIn->a, aIn->b);
+			c2 = aIn->c + y[aIn->a] - y[aIn->b];
 			if(c2 < 0) break; // Aresta a vai entrar;
 
 		}
 
-		if(it == ds->ars.end()) break; //Achou o ótimo
+		if(it == ds->ars.end() || c2 >= 0) break; //Achou o ótimo
+		printf("aIn: %d->%d (%d)\n", aIn->a, aIn->b, aIn->c);
+		ds->ars.remove(aIn);
 
 		// Detecta ciclo
 		//Acha aresta que irá sair.
@@ -52,13 +59,28 @@ int networkSimplex(Tree *T, Dados *ds)
 
 		Aresta *aOut = cicloFund(T, aIn, circ);
 
+		printf("Aout: %d->%d (%d) F = %d\n", aOut->a, aOut->b, aOut->c, aOut->f);
+		aIn->f = aOut->f;
+
+		printf("---------------Circuito--------------\n");
+
 		for( list<CircA*>::const_iterator it = circ.begin();
 				it != circ.end(); ++it)
 		{
 			CircA* ca = *it;
 			Aresta *a = ca->a;
+			printf("%d->%d (%d)\n",a->a, a->b, a->c);
 			a->f += aOut->f*ca->dir;
 		}
+		printf("-----------------------------------\n");
+
+		printf("aIn: %d->%d (%d) F = %d\n", aIn->a, aIn->b, aIn->c, aIn->f);
+
+		trocaAresta(T, aIn, aOut);
+		aOut->f = 0;
+		ds->ars.push_back(aOut);
+
+		calculaDual(T);
 
 		circ.clear();
 
@@ -83,8 +105,8 @@ void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 	float c2 = e->c + y[u] - y[v];
 	int u2 = f->a, v2 = f->b;
 
-	T->T->adj[v2].remove(f);
-	T->T->adj[u2].remove(f);
+	delAresta(T->T,f);
+	addAresta(T->T,e);
 
 	for(int i = 0; i < T->T->V; i++)
 		{
@@ -95,7 +117,10 @@ void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 	dfsAtualizaY(T->T,v, c2);
 
 	T->p[T->r] = NULL;
+	T->d[T->r] = 0;
+	printf("-------------Árvore------------\n");
 	dfsReconstroiP(T,T->r);
+	printf("-------------------------------\n");
 
 	Graph *G = T->T;
 
@@ -122,10 +147,16 @@ void dfsReconstroiP(Tree *T, int v)
 				it != G->adj[v].end(); ++it)
 		{
 			Aresta *a = *it;
+			
 			int u = a->a == v? a->b : a->a ;
-			if(T->p[u] == NULL)
+			//printf("HUE(%d,%d) r = %d\n",v,u, T->r);
+			
+			if(T->p[u] == NULL && u != T->r)
 			{
-				T->p[u] = a; 	
+				printf("%d->%d(%d) F = %d\n", a->a, a->b, a->c, a->f);
+
+				T->p[u] = a;
+				T->d[u] = T->d[v] + 1;	
 				dfsReconstroiP(T, u);
 			}
 		}
@@ -155,7 +186,7 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 	int u = a->b;
 	Aresta* aMin = NULL;
 	Aresta* aTemp = NULL;
-	float fluxoMin = 2^20; //Mudar
+	float fluxoMin = 1<<20; //Mudar
 
 	int dir;
 

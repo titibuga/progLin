@@ -19,6 +19,7 @@ Dados* leDados()
 
 	cin >> ds->nNos;
 	cin >> ds->no >> ds->nf;
+	cin >> ds->f;
 
 	while(cin >> a >> b >> c)
 	{
