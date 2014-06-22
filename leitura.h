@@ -20,5 +20,6 @@ typedef struct dados{
 
 Dados* leDados(char*);
 int gravaSaida(Dados*, char*);
+void liberaDados(Dados* ds);
 
 #endif

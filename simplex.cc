@@ -75,6 +75,8 @@ int networkSimplex(Tree *T, Dados *ds)
 		//printf("Aout: %d->%d (%d) F = %d\n", aOut->a, aOut->b, aOut->c, aOut->f);
 		aIn->f = aOut->f;
 
+
+		// Atualiza os fluxos das arestas no circuito T + aIn
 		for( list<CircA*>::const_iterator it = circ.begin();
 				it != circ.end(); ++it)
 		{
@@ -88,6 +90,8 @@ int networkSimplex(Tree *T, Dados *ds)
 		//printf("aIn: %d->%d (%d) F = %d\n", aIn->a, aIn->b, aIn->c, aIn->f);
 
 		trocaAresta(T, aIn, aOut);
+
+		// aOut saiu da árvore, é colocada de volta em ds.
 		ds->ars.push_back(aOut);
 
 		
@@ -135,6 +139,8 @@ void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 
 	// Recalcula os y's
 	calculaDual(T);
+
+
 /*	Graph *G = T->T;
 
 	for( list<Aresta*>::const_iterator it = G->adj[v].begin();

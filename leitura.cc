@@ -86,3 +86,21 @@ int gravaSaida(Dados *ds, char* saida)
 
     return 1;
 }
+
+/***********************
+liberaDados(Dados* ds)
+Libera a memória alocada por ds
+
+***********************/
+
+
+void liberaDados(Dados* ds)
+{
+
+	// Libera a memória das arestas
+	for(list<Aresta*>::const_iterator it  = ds->ars.begin();
+				it != ds->ars.end(); ++it)
+		delete *it;
+
+	delete ds;
+}

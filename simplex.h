@@ -33,6 +33,10 @@ typedef struct tree{
 		d.resize(n);
 		T = new Graph(n);
 	}
+	~tree()
+	{
+		delete T;
+	}
 
 
 	//vector<int> f; //Flow

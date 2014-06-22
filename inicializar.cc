@@ -30,7 +30,8 @@ Essa nova árvore será uma árvore factível para o problema definido
 por ds, mas conterá somente arestas artificiais com custo = soma
 do custo de todas as outras arestas de ds.
 
-Útil para iniciar o simplex.
+Útil para iniciar o simplex. As arestas artificiais vão ficar
+armazenadas na lista "artificiais".
 
 *********************************/
 
@@ -78,12 +79,23 @@ aresta artificial que tem fluxo != 0. Caso isso aconteça, retornamos
 
 Retornamos 1 caso o problema seja factível.
 
+As arestas em ds estarão com os fluxos da resposta dada pelo
+simplex.
+
 
 PS: Foi verificado que nesse passo de inicialização já
 se resolvia o problema.
 
 
 ********************************/
+
+
+void liberaArestasArt()
+{
+	for( list<Aresta*>::const_iterator it = artificiais.begin();
+			it != artificiais.end(); ++it)
+		delete *it;
+}
 
 int inicializa(Dados *ds)
 {
@@ -103,13 +115,26 @@ int inicializa(Dados *ds)
 
 	networkSimplex(T, ds);
 
-	//delete T; <---- ERRADO
+	
+	// Adiciona as arestas que estavam em T para ds
+	for(int i = 0; i < ds->nNos; i++)
+		if(T->p[i])
+			ds->ars.push_back(T->p[i]);
 
+	
+
+	// Verifica se tem alguma aresta artifial com
+	//fluxo positivo. Caso tenha, o problema é infactível.
 	for( list<Aresta*>::const_iterator it = artificiais.begin();
 				it != artificiais.end(); ++it)
 		{
 			Aresta *a = *it;
-			if(a->f != 0) return 0;
+			if(a->f != 0)
+			{
+				liberaArestasArt();
+				delete T; 
+				return 0;
+			} 
 		}
 
 	// Remove as arestas artificiais dos dados.
@@ -122,9 +147,7 @@ int inicializa(Dados *ds)
 	}
 
 
-	for(int i = 0; i < ds->nNos; i++)
-		if(T->p[i])
-			ds->ars.push_back(T->p[i]);
+	delete T; 
 
 
 	return 1;
