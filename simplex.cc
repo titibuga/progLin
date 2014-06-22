@@ -13,6 +13,24 @@ vector<int> y;
 vector<int> visit;
 
 
+
+
+void imprimeArvore(Tree *T)
+{
+	printf("--------------Árvore----------------\n");
+	for(int i = 0; i < T->T->V; i++)
+	{
+		printf("Y[%d] = %d\n", i, y[i]);
+		Aresta *a = T->p[i];
+		if(a)
+		{
+			printf("%d->%d (%d) - F = %d\n", a->a, a->b, a->c, a->f);
+		}
+	}
+	printf("----------------------------------------\n");
+}
+
+
 /*****************************
 
 A função networkSimplex(Tree *T, Dados *ds)
@@ -42,7 +60,7 @@ int networkSimplex(Tree *T, Dados *ds)
 
 	while(1)
 	{
-		
+		//imprimeArvore(T);
 		// Procura por aresta para entrar
 		Aresta *aIn;
 		float c2 = 0;
@@ -74,15 +92,18 @@ int networkSimplex(Tree *T, Dados *ds)
 
 		//printf("Aout: %d->%d (%d) F = %d\n", aOut->a, aOut->b, aOut->c, aOut->f);
 		aIn->f = aOut->f;
+		int t = aOut->f;
 
 
 		// Atualiza os fluxos das arestas no circuito T + aIn
 		for( list<CircA*>::const_iterator it = circ.begin();
 				it != circ.end(); ++it)
 		{
+
 			CircA* ca = *it;
 			Aresta *a = ca->a;
-			a->f += aOut->f*ca->dir;
+			//printf("%d->%d (%d) - F += %d\n", a->a, a->b, a->c, t*ca->dir );
+			a->f += t*ca->dir;
 			delete ca;
 		}
 
@@ -187,7 +208,7 @@ void dfsReconstroiP(Tree *T, int v)
 			}
 		}
 }
-
+/*
 
 void dfsAtualizaY(Graph *G, int v, float c2)
 {
@@ -202,7 +223,7 @@ void dfsAtualizaY(Graph *G, int v, float c2)
 				dfsAtualizaY(G,u, c2);
 		}
 
-}
+}*/
 
 /************************
 
@@ -225,11 +246,12 @@ do simplex. Essa aresta é retornada pela função.
 
 Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 {
+
 	int v = a->a;
 	int u = a->b;
 	Aresta* aMin = NULL;
 	Aresta* aTemp = NULL;
-	float fluxoMin = 1<<20; //Mudar
+	float fluxoMin = 1<<20; 
 
 	int dir;
 
@@ -237,6 +259,7 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 	//v->u
 	while(T->d[u] > T->d[v])
 	{
+
 		aTemp = T->p[u];
 		dir = 1;
 		if(aTemp->b == u) // Direção oposta da aresta entrando
@@ -255,6 +278,7 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 	}
 	while(T->d[v] > T->d[u])
 	{
+
 		dir = 1;
 		aTemp = T->p[v];
 		if(aTemp->a == v) // Direção oposta da aresta entrando
@@ -267,12 +291,13 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 			}
 			v = aTemp->b;
 		}
-		else v = aTemp->b;	
+		else v = aTemp->a;	
 		circ.push_back(new CircA(aTemp, dir));			
 	}
 
 	while(u != v)
 	{
+
 		dir = 1;
 		aTemp = T->p[u];
 		if(aTemp->b == u) // Direção oposta da aresta entrando
@@ -300,7 +325,7 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 			}
 			v = aTemp->b;
 		}
-		else v = aTemp->b;
+		else v = aTemp->a;
 		circ.push_back(new CircA(aTemp, dir));		
 	}
 
