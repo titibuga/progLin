@@ -22,9 +22,11 @@ typedef struct circA{
 typedef struct tree{
 
 	Graph *T; // Lista de Adjacencia.
-	int r; // Root
-	vector<Aresta*> p; // Parent
-	vector<int> d; // Depth
+	int r; // Raiz
+	vector<Aresta*> p; // Vetor de pai: p[v] é a única aresta "pai" do vértice v
+						// Isso é uma propriedade de árvore. 
+						// p[r] = NULL
+	vector<int> d; // d[v] =  distancia de r até v
 	tree(int n)
 	{
 		p.resize(n);

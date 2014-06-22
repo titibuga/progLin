@@ -13,10 +13,21 @@ vector<int> y;
 vector<int> visit;
 
 
+/*****************************
+
+A função networkSimplex(Tree *T, Dados *ds)
+recebe uma árvore inicial factível T e uma instancia
+de dados ds que descreve o problema.
+
+As arestas de ds e as de T são dois conjuntos disjuntos
+(Ou seja, as arestas de uma não estão na outra.)
+
+Ao final da execução do algorítimo, T será uma árvore
+factível ótima, e todas as arestas que não estiverem
+em T estarão na lista de arestas de ds.
 
 
-
-
+*****************************/
 
 int networkSimplex(Tree *T, Dados *ds)
 {
@@ -42,14 +53,16 @@ int networkSimplex(Tree *T, Dados *ds)
 		{
 
 			aIn = *it;
-			printf("%d->%d\n",aIn->a, aIn->b);
 			c2 = aIn->c + y[aIn->a] - y[aIn->b];
-			if(c2 < 0) break; // Aresta a vai entrar;
+			if(c2 < 0) break; // Aresta "a" vai entrar;
 
 		}
 
-		if(it == ds->ars.end() || c2 >= 0) break; //Achou o ótimo
-		printf("aIn: %d->%d (%d)\n", aIn->a, aIn->b, aIn->c);
+		if(it == ds->ars.end() || c2 >= 0) break; // Se não achou aresta
+												// Para entrar, achou
+												// a árvore ótima
+
+		
 		ds->ars.remove(aIn);
 
 		// Detecta ciclo
@@ -59,28 +72,25 @@ int networkSimplex(Tree *T, Dados *ds)
 
 		Aresta *aOut = cicloFund(T, aIn, circ);
 
-		printf("Aout: %d->%d (%d) F = %d\n", aOut->a, aOut->b, aOut->c, aOut->f);
+		//printf("Aout: %d->%d (%d) F = %d\n", aOut->a, aOut->b, aOut->c, aOut->f);
 		aIn->f = aOut->f;
-
-		printf("---------------Circuito--------------\n");
 
 		for( list<CircA*>::const_iterator it = circ.begin();
 				it != circ.end(); ++it)
 		{
 			CircA* ca = *it;
 			Aresta *a = ca->a;
-			printf("%d->%d (%d)\n",a->a, a->b, a->c);
 			a->f += aOut->f*ca->dir;
+			delete ca;
 		}
-		printf("-----------------------------------\n");
 
-		printf("aIn: %d->%d (%d) F = %d\n", aIn->a, aIn->b, aIn->c, aIn->f);
+
+		//printf("aIn: %d->%d (%d) F = %d\n", aIn->a, aIn->b, aIn->c, aIn->f);
 
 		trocaAresta(T, aIn, aOut);
-		aOut->f = 0;
 		ds->ars.push_back(aOut);
 
-		calculaDual(T);
+		
 
 		circ.clear();
 
@@ -93,17 +103,20 @@ int networkSimplex(Tree *T, Dados *ds)
 
 
 /***************
-* Aresta f sai
-* Aresta e entra
-* Atualiza os y
-* "T + e - f"
+A função trocaAresta(Tree *T, Aresta *e, Aresta *f)
+revebe uma árvore factível T e duas arestas e,f, sendo
+que f está em T e e não está em T.
+
+Ao final da função, a árvore se tornará T + e - f,
+com as variaveis duais y e fluxos nas arestas ajustadas
+de acordo.
 *****************/
 
 void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 {
-	int u = e->a, v = e->b;
-	float c2 = e->c + y[u] - y[v];
-	int u2 = f->a, v2 = f->b;
+	//int u = e->a, v = e->b;
+	//float c2 = e->c + y[u] - y[v];
+	//int u2 = f->a, v2 = f->b;
 
 	delAresta(T->T,f);
 	addAresta(T->T,e);
@@ -114,15 +127,15 @@ void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 			T->p[i] = NULL;
 		}
 
-	dfsAtualizaY(T->T,v, c2);
+	//dfsAtualizaY(T->T,v, c2);
 
 	T->p[T->r] = NULL;
 	T->d[T->r] = 0;
-	printf("-------------Árvore------------\n");
 	dfsReconstroiP(T,T->r);
-	printf("-------------------------------\n");
 
-	Graph *G = T->T;
+	// Recalcula os y's
+	calculaDual(T);
+/*	Graph *G = T->T;
 
 	for( list<Aresta*>::const_iterator it = G->adj[v].begin();
 				it != G->adj[v].end(); ++it)
@@ -132,12 +145,20 @@ void trocaAresta(Tree *T, Aresta *e, Aresta *f)
 			if(!visit[u])
 				dfsAtualizaY(G,u, c2);
 		}
-
+*/
 
 
 
 
 }
+
+/*****************************
+dfsReconstroiP(Tree *T, int v) é uma função recursiva no
+estilo Depth First Search. Ela se baseia na lista de
+adjacência em T->T para reconstruir o vetor T->p de
+pais da árvore.
+*******************************/
+
 
 void dfsReconstroiP(Tree *T, int v)
 {
@@ -153,8 +174,7 @@ void dfsReconstroiP(Tree *T, int v)
 			
 			if(T->p[u] == NULL && u != T->r)
 			{
-				printf("%d->%d(%d) F = %d\n", a->a, a->b, a->c, a->f);
-
+				
 				T->p[u] = a;
 				T->d[u] = T->d[v] + 1;	
 				dfsReconstroiP(T, u);
@@ -178,7 +198,24 @@ void dfsAtualizaY(Graph *G, int v, float c2)
 
 }
 
+/************************
 
+A função cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
+detecta o único circuito formado pot T + a, sendo a uma
+aresta que não está em T.
+
+As arestas desse circuito que estão na árvore serão armazenadas
+na lista "circ" na estrutura especial CircA. 
+
+CircA armazena a aresta do circuito, e armazena em dir
+- 1 caso a aresta esteja na mesma direção de a no circuito
+- -1 c.c.
+
+Além disso, já detecta a aresta contrária de fluxo mínimo.
+Essa será a aresta que irá sair da árvore no próximo passo
+do simplex. Essa aresta é retornada pela função.
+
+**************************/
 
 Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 {
@@ -264,6 +301,18 @@ Aresta* cicloFund(Tree *T, Aresta *a, list<CircA*> &circ)
 	return aMin;
 }
 
+
+
+/******************************
+
+
+Recebe uma árvore T.
+
+Cálcula as variaveis duais yi para todo
+vértice i, começando fazendo y[r] = 0, sendo
+r a raiz da árvore.
+
+********************************/
 
 
 void calculaDual(Tree *T)
